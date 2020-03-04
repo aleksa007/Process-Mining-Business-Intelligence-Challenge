@@ -6,6 +6,8 @@ The workflow will consist of two branches:
 - master
 - develop
 
+It is called the GitFlow and more can be found at https://nvie.com/posts/a-successful-git-branching-model/
+
 We will be working on the _develop_ branch and merging with _master_ once it's tested and 'deployable'.
 
 _"The master branch is meant to be stable, and it is the social contract of
@@ -96,7 +98,6 @@ conflicted text from feature_name
 
 To delete a merged branch: git branch -d <branch_name> 
 No worries: if you accidentally attempt to delete a branch that has not yet been merged, git will throw an error.
-
 
 
 "Because, remember: Don’t. Mess. With. The. Master. "
