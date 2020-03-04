@@ -102,3 +102,4 @@ No worries: if you accidentally attempt to delete a branch that has not yet been
 
 "Because, remember: Don’t. Mess. With. The. Master. "
 
+Also, huge credits to https://thenewstack.io/dont-mess-with-the-master-working-with-branches-in-git-and-github/
