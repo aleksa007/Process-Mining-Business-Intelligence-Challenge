@@ -14,6 +14,7 @@ def main():
     parser.add_argument("train_file", help="Process mining model will be trained on this", type=str)
     parser.add_argument("test_file", help="To test the predictions on, and evaluate later on.", type=str)
     parser.add_argument("output_file", help="Predictions will be saved into a new CSV with this name", type=str)
+    parser.add_argument("--demo", help="Demo version, halved data", action ='store_true')
 
     args = parser.parse_args()
 
@@ -408,8 +409,28 @@ def main():
                   'Real_Diff': real_diff[1:], 'Predicted_Diff': pred_diff}
 
     predicted_df = pd.DataFrame.from_dict(frame_dict)
-    predicted_df.head(10)
-    predicted_df.to_csv(out_path)
+
+    if args.demo:
+        predicted_df.head(10)
+        predicted_df.to_csv(out_path, index = False)
+    else:
+
+        base = pd.read_csv('./data/baseline.csv')
+
+        ones = list(set(base['Case_ID']) - set(predicted_df['Case_ID']))
+
+        base_pred_ev = base['Predicted_Event']
+        base_pred_ts = base['Predicted_TimeDifference']
+
+        for case in ones:
+            row = base[base['Case_ID'] == case].index
+            base = base.drop(row)
+
+        predicted_df['Baseline_Event_prediction'] = base_pred_ev
+        predicted_df['Baseline_Timestamp_prediction'] = base_pred_ts
+
+        predicted_df.head(10)
+        predicted_df.to_csv(out_path, index=False)
 
     os.remove('./fixed.csv')
     os.remove('./fixed_test.csv')
