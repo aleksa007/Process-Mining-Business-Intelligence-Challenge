@@ -4,12 +4,11 @@ import os
 from itertools import tee, combinations, permutations
 import itertools
 
-from memory_profiler import profile
 from progressbar import ProgressBar
 import datetime
 import time
 import argparse
-@profile
+
 def main():
     parser = argparse.ArgumentParser("PM_tool")
     parser.add_argument("train_file", help="Process mining model will be trained on this", type=str)
