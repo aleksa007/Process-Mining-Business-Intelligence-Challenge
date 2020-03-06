@@ -29,6 +29,10 @@ def main():
         train_path = './data/road-train-pre.csv'
         test_path = './data/road-test-pre.csv'
         print('Done with preprocessing')
+    elif (train_path == './data/demo_train.csv') and (test_path == './data/demo_test.csv'):
+        road_preprocess.pre(train_path, test_path)
+        train_path = './data/road-train-pre.csv'
+        test_path = './data/road-test-pre.csv'
     else:
         print('Oops, skipped preprocessing of road data for the sake of the demo version.')
 

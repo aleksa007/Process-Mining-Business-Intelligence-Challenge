@@ -3,11 +3,13 @@ import numpy as np
 import os
 from itertools import tee, combinations, permutations
 import itertools
+
+from memory_profiler import profile
 from progressbar import ProgressBar
 import datetime
 import time
 import argparse
-
+@profile
 def main():
     parser = argparse.ArgumentParser("PM_tool")
     parser.add_argument("train_file", help="Process mining model will be trained on this", type=str)
@@ -292,6 +294,8 @@ def main():
     for x in bugs:
         del t_log[x]
 
+    #print(t_log)
+
     pbar = ProgressBar()
 
     for i in pbar(t_log.keys()):
@@ -405,7 +409,7 @@ def main():
                   'Real_Diff': real_diff[1:], 'Predicted_Diff': pred_diff}
 
     predicted_df = pd.DataFrame.from_dict(frame_dict)
-
+    predicted_df.head(10)
     predicted_df.to_csv(out_path)
 
     os.remove('./fixed.csv')
