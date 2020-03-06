@@ -1,6 +1,6 @@
 To run the tool do the following:
 
-1. Change the working directory into the /main directory and run pip install requirements.txt
+1. Change the working directory into the /main directory and run pip install -r requirements.txt
 2. python main.py ./data/road-train.csv ./data/road-test.csv ./predict.csv
 3. Wait for a few moments
 4. The new predict.csv file will show in the /main directory

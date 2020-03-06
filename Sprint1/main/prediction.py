@@ -1,7 +1,4 @@
-import matplotlib.pyplot as plt;
 import pandas as pd
-
-plt.rcdefaults()
 import numpy as np
 import os
 import datetime
@@ -24,11 +21,6 @@ def main():
     out_path = args.output_file
 
     start_time = time.time()
-
-    # train_path = './data/road_train.csv'
-    # test_path = './data/road_test.csv'
-
-    #print(train_path, test_path)
 
     data_train = pd.read_csv(train_path, error_bad_lines=False, parse_dates=[4], index_col = False)
     data_test = pd.read_csv(test_path, error_bad_lines=False, parse_dates=[4], index_col = False)
@@ -258,6 +250,6 @@ def main():
 
     print("Prediction Time --- %s seconds ---" % (time.time() - start_time))
 
-    predicted_df.to_csv(out_path)
+    predicted_df.to_csv(out_path, index = False)
 
 main()
