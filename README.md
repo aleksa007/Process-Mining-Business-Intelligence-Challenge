@@ -1,4 +1,4 @@
-#Process Mining Group 13 - 2020
+# Process Mining Group 13 - 2020
 
 An attempt to make a well-functioning Process Mining GitHub repo. 
 
@@ -14,7 +14,7 @@ _"The master branch is meant to be stable, and it is the social contract of
 open source software to never, ever push anything to master that
 is not tested, or that breaks the build. "_
 
-###Setup
+### Setup
 To set up the local repo do the following:
 
 1. git clone https://github.com/sakce/process.git
@@ -61,10 +61,10 @@ According to this, we would have to:
 If you do not run into merge conflicts you can simply:
 - git push origin develop
 
-##If you do run into merge conflicts, and you do not know how to fix it, just make sure that they are pushed to the <feature_name> branch and let the group know about the conflict. 
+## If you do run into merge conflicts, and you do not know how to fix it, just make sure that they are pushed to the <feature_name> branch and let the group know about the conflict. 
 
 
-####Fixing the Merge conflicts:
+#### Fixing the Merge conflicts:
 https://dev.to/neshaz/how-to-use-git-merge-the-correctway-25pd
 
 Generate a list of the files which need to be resolved: git status
@@ -91,7 +91,7 @@ conflicted text from feature_name
 - When you're ready to merge, all you have to do is run git add command on the conflicted files to tell Git they're resolved.
 - Commit your changes with git commit to generate the merge commit.
 
-###Merging to Master
+### Merging to Master
 - git checkout master
 - git merge develop -no-ff
 - git push origin master
