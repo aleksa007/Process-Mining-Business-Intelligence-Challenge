@@ -62,8 +62,8 @@ def main():
     base_perm_tree.to_csv(out_path, index = False)
 
     # Evaluation call
+    #evaluate_acc_rmse(base, base_perm)
     evaluate_acc_rmse(base, base_perm, base_perm_tree)
-    #evaluate(base_perm_tree)
     # The End
     return print('Tool running time: {}'.format(time.time() - start_time))
 

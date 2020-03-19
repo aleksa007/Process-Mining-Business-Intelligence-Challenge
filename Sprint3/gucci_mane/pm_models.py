@@ -2,11 +2,12 @@ import math
 import pandas as pd
 import numpy as np
 import itertools
-from itertools import tee
+from itertools import tee, repeat
 from progressbar import ProgressBar
 import os, datetime
 from sklearn.tree import DecisionTreeClassifier
-from sklearn import preprocessing
+from sklearn.linear_model import LinearRegression
+from sklearn import preprocessing, metrics
 
 def baseline(data_train, data_test):
     (eventID, caseID, event_name, transition, stamp) = ("eventID ", "case concept:name",
@@ -443,6 +444,28 @@ def combs_algo(data_train, data_test):
 
     for x in bugs:
         del t_log[x]
+        data_test.drop(data_test.index[data_test['case concept:name'] == x], inplace=True)
+
+    m = 0
+
+    for i in log.keys():
+        if len(log[i][0]) > m:
+            m = len(log[i][0])
+
+    delete = []
+    for i in t_log.keys():
+        if len(t_log[i][0]) > m:
+            print(i)
+            print(t_log[i])
+            delete.append(i)
+            # m_t = len(log_test[i][0])
+
+    for i in delete:
+        print(i)
+
+        data_test.drop(data_test.index[data_test['case concept:name'] == i], inplace=True)
+
+        del t_log[i]
 
 
     pbar = ProgressBar()
@@ -559,6 +582,9 @@ def combs_algo(data_train, data_test):
 
     predicted_df = pd.DataFrame.from_dict(frame_dict)
 
+    print('Len of Comb Algo: {}'.format(len(predicted_df)))
+
+
     return predicted_df
 
 def de_tree(data_train, data_test):
@@ -636,6 +662,7 @@ def de_tree(data_train, data_test):
 
     for x in bugs:  # deleting the above mentioned events
         del log_test[x]
+        data_test.drop(data_test.index[data_test['case concept:name'] == x], inplace=True)
 
     for i in log_test.keys():
         current = log_test[i][0]  # current case' events
@@ -643,6 +670,28 @@ def de_tree(data_train, data_test):
         real_next = current[1:]  # next real events
         real_next.append('New Case')  # adding a 'new case' as real next event for every last event
         log_test[i].append(real_next)
+
+    m = 0
+
+    for i in log.keys():
+        if len(log[i][0]) > m:
+            m = len(log[i][0])
+
+
+    delete = []
+    for i in log_test.keys():
+        if len(log_test[i][0]) > m:
+            print(i)
+            print(log_test[i])
+            delete.append(i)
+            # m_t = len(log_test[i][0])
+
+    for i in delete:
+        print(i)
+
+        data_test.drop(data_test.index[data_test['case concept:name'] == i], inplace=True)
+
+        del log_test[i]
 
     #  new dictionary that will contain for every position(key) the observed traces and next events for each trace(values)
     #  so case [A, B, C] would be saved as {0:[[A],[B]], 1: [[A,B], [C]], 2: [[A, B, C], [New Case]]}
@@ -799,7 +848,6 @@ def de_tree(data_train, data_test):
 
         log_test[i].append(predictions)  # adding all predictions to the log_test of the current case
 
-    # TODO: TIMESTAMPS REGRESSION
 
     # making lists for every column we will have in the frame
     case_names = []
@@ -821,6 +869,183 @@ def de_tree(data_train, data_test):
                   'TimeStamp': timestamp, 'Next_Event': current_real, 'DTree_Event': p_event}
 
     predicted_df = pd.DataFrame.from_dict(frame_dict)  # making a frame
+
+    print('Len of DTree Algo Event Pred: {}'.format(len(predicted_df)))
+
+    # TODO: TIMESTAMPS REGRESSION
+
+    data_train['position_event'] = data_train.groupby('case concept:name').cumcount()
+    data_train['position_event'] = data_train['position_event'] + 1
+    data_train['week_day'] = data_train['event time:timestamp'].dt.dayofweek
+
+    # Encoding all event names into integers
+    cases = data_train['event concept:name'].unique().tolist()
+    cases.insert(0, 'New Case')
+    le_case = preprocessing.LabelEncoder()
+    le_case.fit(cases)
+
+    # Encoding lifecycle into integers
+    life = data_train['event lifecycle:transition'].unique().tolist()
+    le_life = preprocessing.LabelEncoder()
+    le_life.fit(life)
+
+    # Preprocess data for model train
+    # Event poistion
+    x_train_position = np.array(data_train['position_event']).reshape(-1, 1)[:]
+    # Previous event
+    x_train_prev = list(data_train['event concept:name'])
+    x_train_prev = le_case.transform(x_train_prev)
+    x_train_prev = np.array(x_train_prev).reshape(-1, 1)[:]
+    # Event
+    x_train_event = list(data_train['event concept:name'])
+    x_train_event.insert(len(data_train), 'New Case')
+    x_train_event = le_case.transform(x_train_event)
+    x_train_event = np.array(x_train_event).reshape(-1, 1)[1:]
+    # Day of the week previous event event
+    x_train_week = list(data_train['week_day'])
+    x_train_week = np.array(x_train_week).reshape(-1, 1)[:]
+    # Timestamp event
+    data_train[['event time:timestamp']] = data_train[['event time:timestamp']].astype(str)
+    x_train_date = list(data_train['event time:timestamp'])
+    x_train_date.insert(len(data_train), None)
+    x_train_date = np.array(x_train_date).reshape(-1, 1)[1:]
+    # Timestamp previous event
+    x_train_date_prev = list(data_train['event time:timestamp'])
+    x_train_date_prev = np.array(x_train_date_prev).reshape(-1, 1)[:]
+    # Event Lifecycle
+    x_train_life = list(data_train['event lifecycle:transition'])
+    x_train_life = le_life.transform(x_train_life)
+    x_train_life = np.array(x_train_life).reshape(-1, 1)[:]
+
+    # Length case for train set
+    cases = data_train.groupby(['case concept:name'])
+    per_case = pd.DataFrame({'no of events': cases['eventID '].count()})
+    lst_per_case = per_case["no of events"].tolist()
+    case_length = []
+    for length in lst_per_case:
+        case_length.extend(repeat(length, length))
+    x_train_length_case = np.array(case_length).reshape(-1, 1)[:]
+
+    # Combine features for the model train
+    x_train_new = np.concatenate((x_train_position, x_train_prev, x_train_event, x_train_week, x_train_date,
+                                  x_train_date_prev, x_train_length_case, x_train_life), axis=1)
+
+    # Add features to new dataframe train
+    df_train = pd.DataFrame(data=x_train_new,
+                            columns=['position_event', 'prev_event', 'event', 'week_day_prev', 'date', 'date_prev',
+                                     'case_length', 'lifecycle'])
+    df_train.loc[df_train['position_event'] == df_train['case_length'], 'event'] = 5
+    df_train[['date', 'date_prev']] = df_train[['date', 'date_prev']].apply(pd.to_datetime)
+    df_train.loc[df_train['event'] == 5, 'date'] = None
+    df_train['in_between'] = (df_train['date'] - df_train['date_prev']).dt.days
+    df_train.loc[df_train['event'] == 5, 'in_between'] = 0
+    #df_train
+
+    # Train Dummies
+
+    # Implementing dummies train
+    df_train = pd.get_dummies(df_train, columns=['event', 'prev_event', 'week_day_prev', 'position_event', 'lifecycle'])
+    df_train = df_train.drop(['date', 'date_prev'], 1)
+    #df_train
+
+    # Test Data Preprocessing
+
+    # Add new useful columns for the model test
+    data_test['position_event'] = data_test.groupby('case concept:name').cumcount()
+    data_test['position_event'] = data_test['position_event'] + 1
+    data_test['week_day'] = data_test['event time:timestamp'].dt.dayofweek
+
+    predicted_events = predicted_df['DTree_Event'][:].tolist()
+    data_test['pred_event'] = predicted_events
+
+    # Preprocess data for model test
+    # Event poistion
+    x_test_position = np.array(data_test['position_event']).reshape(-1, 1)[:]
+    # Previous event
+    x_test_prev = data_test['event concept:name'].tolist()
+    x_test_prev = le_case.transform(x_test_prev)
+    x_test_prev = np.array(x_test_prev).reshape(-1, 1)[:]
+    # Predicted Event
+    x_test_event = data_test['pred_event'].tolist()
+    x_test_event = le_case.transform(x_test_event)
+    x_test_event = np.array(x_test_event).reshape(-1, 1)[:]
+    # Day of the week previous event
+    x_test_week = data_test['week_day'].tolist()
+    x_test_week = np.array(x_test_week).reshape(-1, 1)[:]
+    # Timestamp event
+    data_test[['event time:timestamp']] = data_test[['event time:timestamp']].astype(str)
+    x_test_date = list(data_test['event time:timestamp'])
+    x_test_date.insert(len(data_test), None)
+    x_test_date = np.array(x_test_date).reshape(-1, 1)[1:]
+    # Timestamp previous event
+    x_test_date_prev = list(data_test['event time:timestamp'])
+    x_test_date_prev = np.array(x_test_date_prev).reshape(-1, 1)[:]
+    # Event Lifecycle
+    x_test_life = data_test['event lifecycle:transition'].tolist()
+    x_test_life = le_life.transform(x_test_life)
+    x_test_life = np.array(x_test_life).reshape(-1, 1)[:]
+
+    # Length case for test set
+    test_cases = data_test.groupby(['case concept:name'])
+    per_case_test = pd.DataFrame({'no of events': test_cases['eventID '].count()})
+    lst_per_case_test = per_case_test["no of events"].tolist()
+    case_length_test = []
+    for length in lst_per_case_test:
+        case_length_test.extend(repeat(length, length))
+    x_test_length_case = np.array(case_length_test).reshape(-1, 1)[:]
+
+    # Combine features for the model test
+    x_test_new = np.concatenate((x_test_position, x_test_prev, x_test_event, x_test_week, x_test_date, x_test_date_prev,
+                                 x_test_length_case, x_test_life), axis=1)
+
+    # Add features to new dataframe test
+    df_test = pd.DataFrame(data=x_test_new,
+                           columns=['position_event', 'prev_event', 'event', 'week_day_prev', 'date', 'date_prev',
+                                    'case_length', 'lifecycle'])
+    df_test.loc[df_test['position_event'] == df_test['case_length'], 'date'] = None
+    df_test[['date', 'date_prev']] = df_test[['date', 'date_prev']].apply(pd.to_datetime)
+    df_test['in_between'] = (df_test['date'] - df_test['date_prev']).dt.days
+    df_test.loc[df_test['position_event'] == df_test['case_length'], 'in_between'] = 0
+    #df_test
+
+    # Remove cases with more events than the cases in the train set
+    df_test = df_test[df_test['case_length'] <= max(df_train['case_length'])]
+    #df_test
+
+    # Test Dummies
+
+    # Implementing dummies test
+    df_test = pd.get_dummies(df_test, columns=['event', 'prev_event', 'week_day_prev', 'position_event', 'lifecycle'])
+    df_test = df_test.drop(['date', 'date_prev'], 1)
+    #df_test
+
+    # Feature selection and model training
+
+
+    col_train = df_train.columns
+    col_test = df_test.columns
+    features = set(col_train).intersection(col_test)
+    features.discard('in_between')
+    X_train = df_train[features]  # Features
+    y_train = df_train['in_between']  # Target variable
+    X_test = df_test[features]  # Features
+    y_test = df_test['in_between']  # Target variable
+
+    # Training the algorithm
+    regressor = LinearRegression()
+    regressor.fit(X_train, y_train)
+
+
+    print(regressor.intercept_)
+    print(regressor.coef_)
+
+    # Evaluation
+
+
+    y_pred = regressor.predict(X_test)
+    print('Len of DTree y_pred: {}'.format(len(y_pred)))
+
+    predicted_df['DTree_TimeDiff'] = y_pred
 
     return predicted_df
 

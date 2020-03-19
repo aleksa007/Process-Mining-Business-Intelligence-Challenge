@@ -76,7 +76,6 @@ def evaluate_acc_rmse(base, perm, d_tree):
     event_real = event_real[1:]
 
     event_pred_combs = np.array(perm['Combs_Event'])[:-1]
-    # event_pred_combs = event_pred_combs[:-1]
     time_pred_combs = np.array(perm['Combs_TimeDiff'])
 
     acc_combs = accuracy_score(event_real, event_pred_combs)
@@ -86,7 +85,6 @@ def evaluate_acc_rmse(base, perm, d_tree):
     print('Root mean squared error for time difference prediction COMBINATIONS: {}'.format(round(rms_combs, 2)))
 
     # Decision Tree Evaluation
-
     event_real = np.array(d_tree['Next_Event'])  # taking next event col. as an array
     event_pred = np.array(d_tree['DTree_Event'])  # taking the predictions as an array
 
@@ -94,25 +92,17 @@ def evaluate_acc_rmse(base, perm, d_tree):
     print('Accuracy for event prediction DECISION TREE: {}%'.format(round(acc_tree, 2) * 100))
 
     # RMSE
+    time_pred_tree = np.array(d_tree['DTree_TimeDiff'])
+
+    rms_tree = np.sqrt(mean_squared_error(time_real, time_pred_tree))
+    print('Root mean squared error for time difference prediction COMBINATIONS: {}'.format(round(rms_tree, 2)))
+
 
     return print('Done.')
-def accuracy():
-    pass
-def rmse():
-    pass
 
-def run_ev():
-    accuracy(), rmse()
 
 if __name__ == '__main__':
-    #import sys
-    #if sys.argv[1] == 'p':
+
     train, test = pre_road('./data/road-train.csv', './data/road-test.csv')
     train.to_csv('./build/road-train-pre.csv')
     test.to_csv('./build/road-test-pre.csv')
-
-    # elif sys.argv[1] == 'e':
-    #     run_ev()
-    # else:
-    #     run_ev()
-    #     run_pre()
