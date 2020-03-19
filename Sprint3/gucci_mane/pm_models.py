@@ -14,9 +14,6 @@ def baseline(data_train, data_test):
                                                         "event concept:name", "event lifecycle:transition",
                                                         "event time:timestamp")
 
-    #data_train[stamp] = pd.to_datetime(data_train[stamp])
-    #data_test[stamp] = pd.to_datetime(data_test[stamp])
-
     # Sorting the frame chronologically and per case.
     data_train = data_train.sort_values(by=[caseID, stamp])
     data_test = data_test.sort_values(by=[caseID, stamp])
@@ -110,7 +107,7 @@ def baseline(data_train, data_test):
                 str_best = x
         event_frequency.append(str_best)  # only the variable with highest count is appended to the frequency list
         index += 1
-    print('Event prediction done')
+    #print('Event prediction done')
     ### Timestamp prediction
 
     # list of lists that contains all timestamps for all events of a case, where every sublist is a new case
@@ -455,13 +452,13 @@ def combs_algo(data_train, data_test):
     delete = []
     for i in t_log.keys():
         if len(t_log[i][0]) > m:
-            print(i)
-            print(t_log[i])
+            #print(i)
+            #print(t_log[i])
             delete.append(i)
             # m_t = len(log_test[i][0])
 
     for i in delete:
-        print(i)
+        #print(i)
 
         data_test.drop(data_test.index[data_test['case concept:name'] == i], inplace=True)
 
@@ -582,7 +579,7 @@ def combs_algo(data_train, data_test):
 
     predicted_df = pd.DataFrame.from_dict(frame_dict)
 
-    print('Len of Comb Algo: {}'.format(len(predicted_df)))
+    #print('Len of Comb Algo: {}'.format(len(predicted_df)))
 
 
     return predicted_df
@@ -681,14 +678,9 @@ def de_tree(data_train, data_test):
     delete = []
     for i in log_test.keys():
         if len(log_test[i][0]) > m:
-            print(i)
-            print(log_test[i])
             delete.append(i)
-            # m_t = len(log_test[i][0])
 
     for i in delete:
-        print(i)
-
         data_test.drop(data_test.index[data_test['case concept:name'] == i], inplace=True)
 
         del log_test[i]
@@ -870,7 +862,7 @@ def de_tree(data_train, data_test):
 
     predicted_df = pd.DataFrame.from_dict(frame_dict)  # making a frame
 
-    print('Len of DTree Algo Event Pred: {}'.format(len(predicted_df)))
+    #print('Len of DTree Algo Event Pred: {}'.format(len(predicted_df)))
 
     # TODO: TIMESTAMPS REGRESSION
 
@@ -1036,14 +1028,14 @@ def de_tree(data_train, data_test):
     regressor.fit(X_train, y_train)
 
 
-    print(regressor.intercept_)
-    print(regressor.coef_)
+    #print(regressor.intercept_)
+    #print(regressor.coef_)
 
     # Evaluation
 
 
     y_pred = regressor.predict(X_test)
-    print('Len of DTree y_pred: {}'.format(len(y_pred)))
+    #print('Len of DTree y_pred: {}'.format(len(y_pred)))
 
     predicted_df['DTree_TimeDiff'] = y_pred
 
