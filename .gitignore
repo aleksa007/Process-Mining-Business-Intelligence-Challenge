@@ -156,3 +156,6 @@ Thumbs.db
 /build
 /jupyter
 /main/__pycache__
+
+# DESKTOP.INI file
+/desktop.ini
