@@ -139,7 +139,7 @@ def baseline(data_train, data_test):
 
     # list of lists that contains all event timestamps for every position, where each sublist is a new position
     pos_times = []
-
+    print('[1/13]')
     for i in pbar(range(times_longest_event)):  # new list is created each iteration
         pos_times.append([])
         for case in time_list:  # for every case a tuple created which contains the current and the next event time
@@ -262,7 +262,7 @@ def combs_algo(data_train, data_test):
         combs.append(p)
 
     pbar = ProgressBar()
-
+    print('[2/13]')
     for i in pbar(log.keys()):
         ID = []
         stamps = []
@@ -274,6 +274,7 @@ def combs_algo(data_train, data_test):
         log[i].append(stamps)
 
     pbar = ProgressBar()
+    print('[3/13]')
 
     for i in pbar(log.keys()):
         count = 0
@@ -309,6 +310,7 @@ def combs_algo(data_train, data_test):
         return str_best
 
     pbar = ProgressBar()
+    print('[4/13]')
 
     comb_times = {}
 
@@ -338,6 +340,7 @@ def combs_algo(data_train, data_test):
             comb_times[comb][i] = listCount(comb_times[comb][i])
 
     pbar = ProgressBar()
+    print('[5/13]')
 
     for i in pbar(log.keys()):
         # Add the real time differences
@@ -378,6 +381,7 @@ def combs_algo(data_train, data_test):
     """Storing all time differences for every combination."""
 
     pbar = ProgressBar()
+    print('[6/13]')
 
     times = {}
     for comb in pbar(combs):
@@ -466,6 +470,7 @@ def combs_algo(data_train, data_test):
 
 
     pbar = ProgressBar()
+    print('[7/13]')
 
     for i in pbar(t_log.keys()):
         ID = []
@@ -478,6 +483,7 @@ def combs_algo(data_train, data_test):
         t_log[i].append(stamps)
 
     pbar = ProgressBar()
+    print('[8/13]')
 
     for i in pbar(t_log.keys()):
         count = 0
@@ -494,6 +500,7 @@ def combs_algo(data_train, data_test):
             count += 1
 
     pbar = ProgressBar()
+    print('[9/13]')
 
     for i in pbar(t_log.keys()):
         # Add the real time differences
@@ -741,6 +748,7 @@ def de_tree(data_train, data_test):
     le.fit(cases)  # encoding all event names into integers
 
     pbar = ProgressBar()
+    print('[10/13]')
 
     for i in pbar(train_data.keys()):  # the dictionaries from above are encoded into integers
 
@@ -762,6 +770,7 @@ def de_tree(data_train, data_test):
     # repeating the procedure from above on the test data
 
     pbar = ProgressBar()
+    print('[11/13]')
 
     for i in pbar(test_data.keys()):
 
@@ -803,6 +812,7 @@ def de_tree(data_train, data_test):
             predictors[i] = decision_tree(i)
 
     pbar = ProgressBar()
+    print('[12/13]')
 
     for i in pbar(
             log_test.keys()):  # adding an array with the encoding to the log_test dict. for every case in the test
@@ -815,6 +825,8 @@ def de_tree(data_train, data_test):
         log_test[i].append(encoded)
 
     pbar = ProgressBar()
+    print('[13/13]')
+
     for i in pbar(log_test.keys()):  # making predictions for every case in the log_test dict
 
         current_encoded = log_test[i][3]
