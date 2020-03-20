@@ -690,40 +690,46 @@ def de_tree(data_train, data_test):
     train_data = {}
 
     for i in log.keys():
+        count = 0
         for x in log[i][0]:
             case = log[i][0]
-            ind = log[i][0].index(x)
+            # ind = log[i][0].index(x)
 
-            if ind not in train_data:  # making the two lists in the dictionary
-                train_data[ind] = [[],
-                                   []]  # list 1 is all for all traces of the position, list 2 is for all next events
+            if count not in train_data:  # making the two lists in the dictionary
+                train_data[count] = [[],
+                                     []]  # list 1 is all for all traces of the position, list 2 is for all next events
 
-            train_data[ind][0].append(case[:ind + 1])  # appending the trace
+            train_data[count][0].append(case[:count + 1])  # appending the trace
 
-            if ind < len(case) - 1:
-                train_data[ind][1].append(case[ind + 1])  # appending the next event of the trace
+            if count < len(case) - 1:
+                train_data[count][1].append(case[count + 1])  # appending the next event of the trace
 
-            elif ind == len(case) - 1:
-                train_data[ind][1].append('New Case')
+            elif count == len(case) - 1:
+                train_data[count][1].append('New Case')
+
+            count += 1
 
     #  repeating the same process on the test data
     test_data = {}
 
     for i in log_test.keys():
+        count = 0
         for x in log_test[i][0]:
             case = log_test[i][0]
-            ind = log_test[i][0].index(x)
+            # ind = log_test[i][0].index(x)
 
-            if ind not in test_data:
-                test_data[ind] = [[], []]
+            if count not in test_data:
+                test_data[count] = [[], []]
 
-            test_data[ind][0].append(case[:ind + 1])  # appending the trace
+            test_data[count][0].append(case[:count + 1])  # appending the trace
 
-            if ind < len(case) - 1:
-                test_data[ind][1].append(case[ind + 1])  # appending the next event of the trace
+            if count < len(case) - 1:
+                test_data[count][1].append(case[count + 1])  # appending the next event of the trace
 
-            elif ind == len(case) - 1:
-                test_data[ind][1].append('New Case')
+            elif count == len(case) - 1:
+                test_data[count][1].append('New Case')
+
+            count += 1
 
     # encoding all unique event names of all the data into integers
 
@@ -789,8 +795,8 @@ def de_tree(data_train, data_test):
     predictors = {}  # dictionary to contain all decision trees given the position
     #  key - position, value - decision tree for that position
 
-    for i in range(len(test_data)):
-        if i >= len(train_data) - 1:
+    for i in test_data.keys():
+        if i > len(train_data) - 1:
             predictors[i] = decision_tree(len(train_data) - 1)
 
         else:
@@ -813,12 +819,12 @@ def de_tree(data_train, data_test):
 
         current_encoded = log_test[i][3]
         predictions = []  # list that will contain all predictions for a given case
+        count = 0
 
         for x in current_encoded:
-            ind = list(current_encoded).index(x)
 
             # the if-else is a checks whether the case length is more than any case length observed in the train data
-            if ind >= len(train_data) - 1:  # if its in the train data we call the appropriate decision tree
+            if count >= len(train_data) - 1:  # if its in the train data we call the appropriate decision tree
 
                 tree = predictors[len(train_data) - 1]  # calling the right tree given the position
                 p = current_encoded[:(len(train_data))]  # taking the trace
@@ -831,15 +837,16 @@ def de_tree(data_train, data_test):
 
             else:  # if its not in the train data then we use the last observed decision tree from the train data
 
-                tree = predictors[ind]  # calling the right tree given the position
-                p = current_encoded[:ind + 1]  # taking the trace
+                tree = predictors[count]  # calling the right tree given the position
+                p = current_encoded[:count + 1]  # taking the trace
                 p = p.reshape(1, -1)  # we need to do that, idk why
                 pred = tree.predict(p)  # making a prediction
                 pred_string = le.inverse_transform(pred)[0]  # transforming the prediction into a string
                 predictions.append(pred_string)  # appending the prediction as a string to the log_test data
 
-        log_test[i].append(predictions)  # adding all predictions to the log_test of the current case
+            count += 1
 
+        log_test[i].append(predictions)  # adding all predictions to the log_test of the current case
 
     # making lists for every column we will have in the frame
     case_names = []
