@@ -8,7 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
+
 develop-eggs/
 dist/
 downloads/
@@ -153,6 +153,9 @@ Thumbs.db
 # Virtual env #
 ######################
 /venv
-/build
+#/build
 /jupyter
 /main/__pycache__
+
+# DESKTOP.INI file
+/desktop.ini
