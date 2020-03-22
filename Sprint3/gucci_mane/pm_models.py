@@ -221,7 +221,6 @@ def baseline(data_train, data_test):
 
 def combs_algo(data_train, data_test):
 
-    #data_train['event time:timestamp'] = pd.to_datetime(data_train['event time:timestamp'])
     data_train = data_train.sort_values(by=['case concept:name', 'event time:timestamp'])
     data_train['day_of_week'] = data_train['event time:timestamp'].dt.dayofweek
     data_train.to_csv("./build/fixed.csv")
