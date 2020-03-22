@@ -1,7 +1,7 @@
 import time, argparse
 
 from pm_models import baseline, combs_algo, de_tree
-from pre_ev import evaluate_acc_rmse, pre_road
+from pre_ev import evaluate_acc_rmse, pre_data
 
 
 def main():
@@ -23,11 +23,11 @@ def main():
 
     # Preprocess calls
     if train_path == './data/road-train.csv' and test_path == './data/road-test.csv':
-        df_train, df_test = pre_road(train_path, test_path)
+        df_train, df_test = pre_data(train_path, test_path)
     elif train_path == './data/2017-train.csv' and test_path == './data/2017-test.csv':
-        print('Not yet')
-        sys.exit()
-
+        df_train, df_test = pre_data(train_path, test_path)
+    else:
+        print("Oops, can't find those files.")
     # Baseline call
     base = baseline(df_train, df_test)
 

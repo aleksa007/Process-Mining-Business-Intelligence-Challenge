@@ -622,6 +622,20 @@ def de_tree(data_train, data_test):
     data_train = data_train.sort_values(by=['case concept:name', 'event time:timestamp'])
     data_test = data_test.sort_values(by=['case concept:name', 'event time:timestamp'])
 
+    if 'case LoanGoal' in data_train.columns:
+        data_train['case LoanGoal'] = data_train['case LoanGoal'].apply(
+            lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
+
+        data_test['case LoanGoal'] = data_test['case LoanGoal'].apply(
+            lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
+        datetimeFormat = '%Y-%m-%d %H:%M:%S.%f'
+
+        pt1, pt2, pt3 = 4, 8, 12
+    else:  # check if raod data
+        datetimeFormat = '%Y-%m-%d'
+
+        pt1, pt2, pt3 = 2, 3, 5
+
     data_train.to_csv("./build/fixed.csv")
 
     log = dict()  # dictionary that contains all information for a case - key: case name; values: events, timestamps
@@ -632,10 +646,10 @@ def de_tree(data_train, data_test):
             if len(line) == 0:
                 continue
             parts = line.split(',')
-            caseid = parts[2]
+            caseid = parts[pt1]
 
-            task = parts[3]
-            timestamp = parts[5]
+            task = parts[pt2]
+            timestamp = parts[pt3]
 
             if caseid not in log:
                 log[caseid] = [[], []]
@@ -667,10 +681,10 @@ def de_tree(data_train, data_test):
             if len(line) == 0:
                 continue
             parts = line.split(',')
-            caseid = parts[2]
+            caseid = parts[pt1]
 
-            task = parts[3]
-            timestamp = parts[5]
+            task = parts[pt2]
+            timestamp = parts[pt3]
 
             if caseid not in log_test:
                 log_test[caseid] = [[], []]
@@ -773,8 +787,13 @@ def de_tree(data_train, data_test):
     le = preprocessing.LabelEncoder()
     le.fit(cases)  # encoding all event names into integers
 
+
+    if 'case loanGoal' in train_data:
+        print('[10/13] - This one might take a while. ')
+    else:
+        print('[10/13]')
+
     pbar = ProgressBar()
-    print('[10/13]')
 
     for i in pbar(train_data.keys()):  # the dictionaries from above are encoded into integers
 

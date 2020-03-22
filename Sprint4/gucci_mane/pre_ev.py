@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.metrics import mean_squared_error, accuracy_score
 
 '''For accuracy and rmse - do it for all three new columns'''
-def pre_road(train_path: str, test_path: str) -> object:
+def pre_data(train_path: str, test_path: str) -> object:
     df2_test = pd.read_csv(train_path)
     df2_train = pd.read_csv(test_path)
 
@@ -102,6 +102,6 @@ def evaluate_acc_rmse(base, perm, d_tree):
 
 if __name__ == '__main__':
 
-    train, test = pre_road('./data/road-train.csv', './data/road-test.csv')
+    train, test = pre_data('./data/road-train.csv', './data/road-test.csv')
     train.to_csv('./build/road-train-pre.csv')
     test.to_csv('./build/road-test-pre.csv')
