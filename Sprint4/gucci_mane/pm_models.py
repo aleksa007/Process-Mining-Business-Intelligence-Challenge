@@ -14,6 +14,20 @@ def baseline(data_train, data_test):
                                                         "event concept:name", "event lifecycle:transition",
                                                         "event time:timestamp")
 
+    if 'case LoanGoal' in data_train.columns:
+        data_train['case LoanGoal'] = data_train['case LoanGoal'].apply(
+            lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
+
+        data_test['case LoanGoal'] = data_test['case LoanGoal'].apply(
+            lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
+        datetimeFormat = '%Y-%m-%d %H:%M:%S.%f'
+
+        pt1, pt2, pt3 = 4, 8, 12
+    else:  # check if raod data
+        datetimeFormat = '%Y-%m-%d'
+
+        pt1, pt2, pt3 = 2, 3, 5
+
     # Sorting the frame chronologically and per case.
     data_train = data_train.sort_values(by=[caseID, stamp])
     data_test = data_test.sort_values(by=[caseID, stamp])
@@ -36,9 +50,9 @@ def baseline(data_train, data_test):
             if len(line) == 0:
                 continue
             parts = line.split(',')
-            caseid = parts[2]
-            task = parts[3]
-            timestamp = parts[5]
+            caseid = parts[pt1]
+            task = parts[pt2]
+            timestamp = parts[pt3]
 
             if caseid not in log:
                 log[caseid] = [[], []]
@@ -58,9 +72,9 @@ def baseline(data_train, data_test):
             if len(line) == 0:
                 continue
             parts = line.split(',')
-            caseid = parts[2]
-            task = parts[3]
-            timestamp = parts[5]
+            caseid = parts[pt1]
+            task = parts[pt2]
+            timestamp = parts[pt3]
 
             if caseid not in log_test:
                 log_test[caseid] = [[], []]
@@ -126,10 +140,10 @@ def baseline(data_train, data_test):
 
     # print("Longest event in test: ", times_longest_event_test)
 
-    def timeDiff(tup):
+    def timeDiff(tup, datetimeFormat):
         """The function calculates the difference between two timestamps and returns the absolute value."""
 
-        datetimeFormat = '%Y-%m-%d'
+        #datetimeFormat = '%Y-%m-%d'
         diff = datetime.datetime.strptime(tup[0], datetimeFormat) \
                - datetime.datetime.strptime(tup[1], datetimeFormat)
 
@@ -145,7 +159,7 @@ def baseline(data_train, data_test):
         for case in time_list:  # for every case a tuple created which contains the current and the next event time
             if (len(case) - 1) > i:
                 event_tpl = (case[i], case[i + 1])
-                pos_times[i].append(timeDiff(event_tpl))  # the difference is calculated and saved in a list
+                pos_times[i].append(timeDiff(event_tpl, datetimeFormat))  # the difference is calculated and saved in a list
             else:
                 pass
 
@@ -185,7 +199,7 @@ def baseline(data_train, data_test):
                 this = event
                 following = log_test[case][1][i + 1]
                 real_time_tup = (this, following)
-                real_diff.append(timeDiff(real_time_tup))
+                real_diff.append(timeDiff(real_time_tup, datetimeFormat))
             else:
                 real_diff.append(0)
         log_test[case].extend([real_diff])
@@ -200,11 +214,7 @@ def baseline(data_train, data_test):
     for i in log_test.keys():
         for x in range(len(log_test[i][0])):
             case_names.append(i)
-            # it = iter(log_test[i])
-            # the_len = len(next(it))
-            # if not all(len(l) == the_len for l in it):
-            #     print(log_test[i])
-            #     raise ValueError('not all lists have same length!')
+
             event_names.append(log_test[i][0][x])
             timestamp.append(log_test[i][1][x])
             p_event.append(log_test[i][2][x])

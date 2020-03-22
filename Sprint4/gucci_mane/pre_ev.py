@@ -53,8 +53,7 @@ def pre_road(train_path: str, test_path: str) -> object:
 def evaluate_acc_rmse(base, perm, d_tree):
 
     # Baseline Evaluation
-    event_real = np.array(base['Event_Name'])
-    event_real = event_real[1:]
+    event_real = np.array(base['Event_Name'])[1:]
 
     time_real = np.array(base['Real_TimeDiff'])
 
@@ -64,6 +63,10 @@ def evaluate_acc_rmse(base, perm, d_tree):
 
     acc_baseline = accuracy_score(event_real, event_pred_baseline)
     print('Accuracy for event prediction BASELINE: {}%'.format(round(acc_baseline, 2) * 100))
+
+    if pd.Series(time_pred_baseline).isnull().values.any():
+        time_pred_baseline = [i if (not np.isnan(i)) else 5. for i in time_pred_baseline]
+
     rms_baseline = np.sqrt(mean_squared_error(time_real, time_pred_baseline))
     print('Root mean squared error for time difference prediction BASELINE: {}'.format(round(rms_baseline, 2)))
 
