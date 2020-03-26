@@ -13,6 +13,7 @@ def baseline(data_train, data_test):
     (eventID, caseID, event_name, transition, stamp) = ("eventID ", "case concept:name",
                                                         "event concept:name", "event lifecycle:transition",
                                                         "event time:timestamp")
+    datetimeFormat = '%Y-%m-%d %H:%M:%S.%f'
 
     if 'case LoanGoal' in data_train.columns:
         data_train['case LoanGoal'] = data_train['case LoanGoal'].apply(
@@ -20,13 +21,17 @@ def baseline(data_train, data_test):
 
         data_test['case LoanGoal'] = data_test['case LoanGoal'].apply(
             lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
-        datetimeFormat = '%Y-%m-%d %H:%M:%S.%f'
+        #datetimeFormat = '%Y-%m-%d %H:%M:%S.%f'
 
-        pt1, pt2, pt3 = 4, 8, 12
-    else:  # check if raod data
+        #pt1, pt2, pt3 = 4, 8, 12
+    elif len(data_train.columns) == 5:  # check if road data
         datetimeFormat = '%Y-%m-%d'
 
-        pt1, pt2, pt3 = 2, 3, 5
+        #pt1, pt2, pt3 = 2, 3, 5
+    print(datetimeFormat)
+    pt1 = data_train.columns.get_loc('case concept:name') + 1
+    pt2 = data_train.columns.get_loc('event concept:name') + 1
+    pt3 = data_train.columns.get_loc('event time:timestamp') + 1
 
     # Sorting the frame chronologically and per case.
     data_train = data_train.sort_values(by=[caseID, stamp])
@@ -234,17 +239,28 @@ def combs_algo(data_train, data_test):
     data_train = data_train.sort_values(by=['case concept:name', 'event time:timestamp'])
     data_train['day_of_week'] = data_train['event time:timestamp'].dt.dayofweek
 
-    ## ADDITION
+    datetimeFormat = '%Y-%m-%d %H:%M:%S.%f'
+
+    # LOAN DATA
     if 'case LoanGoal' in data_train.columns:
         data_train['case LoanGoal'] = data_train['case LoanGoal'].apply(
             lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
-        datetimeFormat = '%Y-%m-%d %H:%M:%S.%f'
 
-        pt1, pt2, pt3, pt4 = 4, 8, 12, 13
-    else:  # check if raod data
+        data_test['case LoanGoal'] = data_test['case LoanGoal'].apply(
+            lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
+
+    # ROAD DATA
+    elif 'Create Fine' in data_train['event concept:name'].values:
         datetimeFormat = '%Y-%m-%d'
+        #print("This is road data")
 
-        pt1, pt2, pt3, pt4 = 2, 3, 5, 6
+    #print(datetimeFormat)
+
+
+    pt1 = data_train.columns.get_loc('case concept:name') + 1
+    pt2 = data_train.columns.get_loc('event concept:name') + 1
+    pt3 = data_train.columns.get_loc('event time:timestamp') + 1
+    pt4 = data_train.columns.get_loc('day_of_week') + 1
 
     data_train.to_csv("./build/fixed.csv")
 
@@ -622,19 +638,23 @@ def de_tree(data_train, data_test):
     data_train = data_train.sort_values(by=['case concept:name', 'event time:timestamp'])
     data_test = data_test.sort_values(by=['case concept:name', 'event time:timestamp'])
 
+    datetimeFormat = '%Y-%m-%d %H:%M:%S.%f'
+
     if 'case LoanGoal' in data_train.columns:
         data_train['case LoanGoal'] = data_train['case LoanGoal'].apply(
             lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
 
         data_test['case LoanGoal'] = data_test['case LoanGoal'].apply(
             lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
-        datetimeFormat = '%Y-%m-%d %H:%M:%S.%f'
 
-        pt1, pt2, pt3 = 4, 8, 12
-    else:  # check if raod data
+    # ROAD DATA
+
+    elif 'Create Fine' in data_train['event concept:name'].values:
         datetimeFormat = '%Y-%m-%d'
 
-        pt1, pt2, pt3 = 2, 3, 5
+    pt1 = data_train.columns.get_loc('case concept:name') + 1
+    pt2 = data_train.columns.get_loc('event concept:name') + 1
+    pt3 = data_train.columns.get_loc('event time:timestamp') + 1
 
     data_train.to_csv("./build/fixed.csv")
 

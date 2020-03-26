@@ -11,12 +11,11 @@ To run the tool do the following:
 	-! In this case, the data is halved(both train and test) and output csv file only contains
 	predictions for the 'combinations' algorithm.
 
+Tool can be run on 2017 data as well, by running the following command:
+- python gucci_mane.py ./data/2017-train.csv ./data/2017-test.csv ./predict-2017.csv
+* Keep in mind that this takes approximately 40 minutes. 
 
-
-At the moment, the tool has not been tested with other data. However, if you try to run it, then the script
-preprocessing is not going to run, because it was partly hard coded.
-
-Preprocessing of road data combines the data back again, and splits it in a way such that:
+Preprocessing of the data combines the data back again, and splits it in a way such that:
 - cases in train data finish by a certain 'now' moment
 - cases in test data start only after the 'now' moment
 - the 'now' moment is the hard-coded part, which is why this script is not run on other data

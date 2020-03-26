@@ -5,8 +5,15 @@ from sklearn.metrics import mean_squared_error, accuracy_score
 
 '''For accuracy and rmse - do it for all three new columns'''
 def pre_data(train_path: str, test_path: str) -> object:
-    df2_test = pd.read_csv(train_path)
-    df2_train = pd.read_csv(test_path)
+
+    if train_path == './data/2018-train.csv':
+        df2_test = pd.read_csv(test_path, encoding = "ISO-8859-1",
+        error_bad_lines = False, dtype = {'event org:resource': str})
+        df2_train = pd.read_csv(train_path, encoding = "ISO-8859-1",
+        error_bad_lines = False, dtype = {'event org:resource': str})
+    else:
+        df2_test = pd.read_csv(train_path)
+        df2_train = pd.read_csv(test_path)
 
     # Convert from string to datetime
     df2_train['event time:timestamp'] = pd.to_datetime(df2_train['event time:timestamp'])
@@ -37,8 +44,10 @@ def pre_data(train_path: str, test_path: str) -> object:
     #    ['case concept:name']].iloc[-1]['event time:timestamp']
     if 'case LoanGoal' in df2_train:
         now = pd.Timestamp('2016-12-08')
-    else:
+    elif len(df2_train.columns) == 5:
         now = pd.Timestamp('2012-12-12')
+    else:
+        now = pd.Timestamp('2017-11-12')
 
     # Training and test set before 'now'
     df_train_new_now = df_train_new.loc[(df_train_new['event time:timestamp'] <= now)]
@@ -94,14 +103,16 @@ def evaluate_acc_rmse(base, perm, d_tree):
     time_pred_tree = np.array(d_tree['DTree_TimeDiff'])
 
     rms_tree = np.sqrt(mean_squared_error(time_real, time_pred_tree))
-    print('Root mean squared error for time difference prediction COMBINATIONS: {}'.format(round(rms_tree, 2)))
+    print('Root mean squared error for time difference prediction DECISION TREE: {}'.format(round(rms_tree, 2)))
 
 
     return print('Done.')
 
 
 if __name__ == '__main__':
-
-    train, test = pre_data('./data/road-train.csv', './data/road-test.csv')
-    train.to_csv('./build/road-train-pre.csv')
-    test.to_csv('./build/road-test-pre.csv')
+    import time
+    start = time.time()
+    train, test = pre_data('./data/2018-train.csv', './data/2018-test.csv')
+    train.to_csv('./build/2018-train-pre.csv')
+    test.to_csv('./build/2018-test-pre.csv')
+    print(time.time() - start)
