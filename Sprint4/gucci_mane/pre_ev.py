@@ -8,9 +8,9 @@ def pre_data(train_path: str, test_path: str) -> object:
 
     if train_path == './data/2018-train.csv':
         df2_test = pd.read_csv(test_path, encoding = "ISO-8859-1",
-        error_bad_lines = False, dtype = {'event org:resource': str})
+        error_bad_lines = False, dtype = {'event org:resource': str}, engine='python')
         df2_train = pd.read_csv(train_path, encoding = "ISO-8859-1",
-        error_bad_lines = False, dtype = {'event org:resource': str})
+        error_bad_lines = False, dtype = {'event org:resource': str}, engine='python')
     else:
         df2_test = pd.read_csv(train_path)
         df2_train = pd.read_csv(test_path)

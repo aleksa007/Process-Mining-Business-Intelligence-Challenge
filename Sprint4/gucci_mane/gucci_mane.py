@@ -30,6 +30,8 @@ def main():
         df_train, df_test = pre_data(train_path, test_path)
     elif train_path == './data/2018-train.csv' and test_path == './data/2018-test.csv':
         df_train, df_test = pre_data(train_path, test_path)
+    elif train_path.startswith('./data/road') and test_path.startswith('./data/road'):
+        df_train, df_test = pre_data(train_path, test_path)
     else:
         print("Oops, can't find those files.")
         sys.exit()

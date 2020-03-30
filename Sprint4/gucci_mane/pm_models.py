@@ -28,7 +28,7 @@ def baseline(data_train, data_test):
         datetimeFormat = '%Y-%m-%d'
 
         #pt1, pt2, pt3 = 2, 3, 5
-    print(datetimeFormat)
+    #print(datetimeFormat)
     pt1 = data_train.columns.get_loc('case concept:name') + 1
     pt2 = data_train.columns.get_loc('event concept:name') + 1
     pt3 = data_train.columns.get_loc('event time:timestamp') + 1
@@ -272,6 +272,7 @@ def combs_algo(data_train, data_test):
             if len(line) == 0:
                 continue
             parts = line.split(',')
+
             caseid = parts[pt1]
 
             task = parts[pt2]
