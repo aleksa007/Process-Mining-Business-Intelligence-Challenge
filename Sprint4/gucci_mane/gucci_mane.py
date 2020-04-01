@@ -1,10 +1,11 @@
 import time, argparse
-
+#from memory_profiler import profile
 from pm_models import baseline, combs_algo, de_tree
 from pre_ev import evaluate_acc_rmse, pre_data
 import sys
 
 
+#@profile
 def main():
     # Taking the arguments
     parser = argparse.ArgumentParser("PM_tool")
@@ -22,19 +23,17 @@ def main():
 
     # Start
     start_time = time.time()
-
+    datasets = ['./data/road-train.csv', './data/2017-train.csv', './data/2018-train.csv']
+    test_datasets = ['./data/road-test.csv', './data/2017-test.csv', './data/2018-test.csv']
     # Preprocess calls
-    if train_path == './data/road-train.csv' and test_path == './data/road-test.csv':
-        df_train, df_test = pre_data(train_path, test_path)
-    elif train_path == './data/2017-train.csv' and test_path == './data/2017-test.csv':
-        df_train, df_test = pre_data(train_path, test_path)
-    elif train_path == './data/2018-train.csv' and test_path == './data/2018-test.csv':
+    if train_path in datasets and test_path in test_datasets:
         df_train, df_test = pre_data(train_path, test_path)
     elif train_path.startswith('./data/road') and test_path.startswith('./data/road'):
         df_train, df_test = pre_data(train_path, test_path)
     else:
         print("Oops, can't find those files.")
         sys.exit()
+
     # Baseline call
     base = baseline(df_train, df_test)
 
@@ -44,12 +43,12 @@ def main():
     # Adding baseline predictions
     ones = list(set(base['Case_ID']) - set(base_perm['Case_ID']))
 
-    base_pred_ev = base['Baseline_Event']
-    base_pred_ts = base['Baseline_TimeDiff']
-
     for case in ones:
         row = base[base['Case_ID'] == case].index
         base = base.drop(row)
+
+    base_pred_ev = base['Baseline_Event']
+    base_pred_ts = base['Baseline_TimeDiff']
 
     base_perm['Baseline_Event'] = base_pred_ev
     base_perm['Baseline_TimeDiff'] = base_pred_ts
@@ -64,20 +63,24 @@ def main():
     base_perm_tree['Baseline_Event'] = base_pred_ev
     base_perm_tree['Baseline_TimeDiff'] = base_pred_ts
 
+    outputfile = base_perm_tree.copy()
+    outputfile = outputfile.drop(['DTree_Actual_TimeDiff'], axis = 1)
     # Output
-    #base_perm.to_csv(out_path, index = False)
-    base_perm_tree.to_csv(out_path, index = False)
+    outputfile.to_csv(out_path, index = False)
 
     # Evaluation call
-    #evaluate_acc_rmse(base, base_perm)
     evaluate_acc_rmse(base, base_perm, base_perm_tree)
+
     # The End
     return print('Tool running time: {}'.format(time.time() - start_time))
-
-# Once ready, delete below
-#main()
 
 if __name__ == '__main__':
 
     main()
-    #os.system('python gucci_mane.py ./data/road-train.csv ./data/road-test.csv ./predict.csv')
+    try:
+        import winsound
+        duration = 2000
+        freq = 840
+        winsound.Beep(freq, duration)
+    except:
+        print("Tool is done.")

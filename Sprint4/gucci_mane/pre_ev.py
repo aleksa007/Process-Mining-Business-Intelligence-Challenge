@@ -1,6 +1,6 @@
-import argparse
 import pandas as pd
 import numpy as np
+from math import sqrt
 from sklearn.metrics import mean_squared_error, accuracy_score
 
 '''For accuracy and rmse - do it for all three new columns'''
@@ -53,10 +53,6 @@ def pre_data(train_path: str, test_path: str) -> object:
     df_train_new_now = df_train_new.loc[(df_train_new['event time:timestamp'] <= now)]
     df_test_new_now = df_test_new.loc[(df_test_new['event time:timestamp'] <= now)]
 
-    # Add argument, if -p, output the preprocessed files as csv's
-    # df_test_new_now.to_csv('./data/road-test-pre.csv', index=False)
-    # df_train_new_now.to_csv('./data/road-train-pre.csv', index=False)
-
     return df_train_new_now, df_test_new_now
 
 def evaluate_acc_rmse(base, perm, d_tree):
@@ -67,7 +63,6 @@ def evaluate_acc_rmse(base, perm, d_tree):
     time_real = np.array(base['Real_TimeDiff'])
 
     event_pred_baseline = np.array(base['Baseline_Event'])[:-1]
-    # event_pred_baseline = event_pred_baseline[:-1]
     time_pred_baseline = np.array(base['Baseline_TimeDiff'])
 
     acc_baseline = accuracy_score(event_real, event_pred_baseline)
@@ -99,10 +94,11 @@ def evaluate_acc_rmse(base, perm, d_tree):
     acc_tree = accuracy_score(event_real, event_pred)  # calculates the accuracy based on the both arrays
     print('Accuracy for event prediction DECISION TREE: {}%'.format(round(acc_tree, 2) * 100))
 
-    # RMSE
+    # RMSE D Tree
+    time_real_tree = np.array(d_tree['DTree_Actual_TimeDiff'])
     time_pred_tree = np.array(d_tree['DTree_TimeDiff'])
 
-    rms_tree = np.sqrt(mean_squared_error(time_real, time_pred_tree))
+    rms_tree = sqrt(mean_squared_error(time_real_tree, time_pred_tree))/60/60/24
     print('Root mean squared error for time difference prediction DECISION TREE: {}'.format(round(rms_tree, 2)))
 
 
