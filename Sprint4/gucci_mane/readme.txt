@@ -9,7 +9,8 @@ To run the tool do the following:
 5. To run the demo, only difference is the data you will be giving to the tool. Run:
 	python main.py ./data/demo_data/road_train_0.4.csv ./data/demo_data/road_test_0.4.csv ./build/predict_0.4.csv
 
-
+Tool can be run on 2012 data as well, by running the following command:
+- python gucci_mane.py ./data/2012-train.csv ./data/2012-test.csv ./predict-2012.csv
 Tool can be run on 2017 data as well, by running the following command:
 - python gucci_mane.py ./data/2017-train.csv ./data/2017-test.csv ./predict-2017.csv
 * Keep in mind that this takes approximately 40 minutes.

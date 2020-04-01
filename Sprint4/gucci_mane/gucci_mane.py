@@ -23,8 +23,8 @@ def main():
 
     # Start
     start_time = time.time()
-    datasets = ['./data/road-train.csv', './data/2017-train.csv', './data/2018-train.csv']
-    test_datasets = ['./data/road-test.csv', './data/2017-test.csv', './data/2018-test.csv']
+    datasets = ['./data/road-train.csv', './data/2017-train.csv', './data/2018-train.csv', './data/2012-train.csv']
+    test_datasets = ['./data/road-test.csv', './data/2017-test.csv', './data/2018-test.csv', './data/2012-test.csv']
     # Preprocess calls
     if train_path in datasets and test_path in test_datasets:
         df_train, df_test = pre_data(train_path, test_path)

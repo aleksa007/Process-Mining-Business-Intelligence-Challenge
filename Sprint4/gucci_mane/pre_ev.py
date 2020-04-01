@@ -46,6 +46,8 @@ def pre_data(train_path: str, test_path: str) -> object:
         now = pd.Timestamp('2016-12-08')
     elif len(df2_train.columns) == 5:
         now = pd.Timestamp('2012-12-12')
+    elif 'case AMOUNT_REQ' in df2_train:
+        now = pd.Timestamp('2012-10-02')
     else:
         now = pd.Timestamp('2017-11-12')
 
@@ -108,7 +110,7 @@ def evaluate_acc_rmse(base, perm, d_tree):
 if __name__ == '__main__':
     import time
     start = time.time()
-    train, test = pre_data('./data/2018-train.csv', './data/2018-test.csv')
-    train.to_csv('./build/2018-train-pre.csv')
-    test.to_csv('./build/2018-test-pre.csv')
+    train, test = pre_data('./data/2012-train.csv', './data/2012-test.csv')
+    train.to_csv('./build/2012-train-pre.csv')
+    test.to_csv('./build/2012-test-pre.csv')
     print(time.time() - start)
