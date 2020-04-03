@@ -10,7 +10,7 @@ from progressbar import ProgressBar
 from sklearn import preprocessing
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeClassifier
-
+import lightgbm as lgb
 
 def baseline(data_train, data_test):
     (eventID, caseID, event_name, transition, stamp) = ("eventID ", "case concept:name",
@@ -630,6 +630,8 @@ def de_tree(data_train, data_test):
     data_test['event time:timestamp'] = pd.to_datetime(data_test['event time:timestamp'])
     data_test = data_test.sort_values(by=['case concept:name', 'event time:timestamp'])
 
+    lg = False
+
     # LOAN DATA
     if 'case LoanGoal' in data_train.columns:
         data_train['case LoanGoal'] = data_train['case LoanGoal'].apply(
@@ -637,6 +639,10 @@ def de_tree(data_train, data_test):
 
         data_test['case LoanGoal'] = data_test['case LoanGoal'].apply(
             lambda x: 'Other - see explanation' if x == 'Other, see explanation' else x)
+
+        lg = True
+    elif 'case AMOUNT_REQ' in data_train.columns:
+        lg = True
 
     pt1 = data_train.columns.get_loc('case concept:name') + 1
     pt2 = data_train.columns.get_loc('event concept:name') + 1
@@ -983,8 +989,10 @@ def de_tree(data_train, data_test):
     predicted_df = pd.DataFrame.from_dict(frame_dict)
 
     ### TIMESTAMPS REGRESSION
-
-    print("Timestamp Linear Regression Prediction...")
+    if not lg:
+        print("Timestamp Linear Regression Prediction...")
+    else:
+        print("Timestamp Prediction...")
 
     train = data_train.copy()
     test = data_test.copy()
@@ -1061,8 +1069,10 @@ def de_tree(data_train, data_test):
 
     # Train Dummies
 
+    if not lg:
     # Implementing dummies train
-    df_train = pd.get_dummies(df_train, columns=['event', 'prev_event', 'week_day_prev', 'position_event', 'lifecycle'])
+        df_train = pd.get_dummies(df_train, columns=['event', 'prev_event', 'week_day_prev', 'position_event', 'lifecycle'])
+
     df_train = df_train.drop(['date', 'date_prev'], 1)
 
     # Test Data Preprocessing
@@ -1131,29 +1141,62 @@ def de_tree(data_train, data_test):
     # Test Dummies
 
     # Implementing dummies test
-    df_test_d = pd.get_dummies(df_test, columns=['event', 'prev_event', 'week_day_prev', 'position_event', 'lifecycle'])
-    df_test_d = df_test_d.drop(['date', 'date_prev'], 1)
+    if not lg:
+        df_test_d = pd.get_dummies(df_test, columns=['event', 'prev_event', 'week_day_prev', 'position_event', 'lifecycle'])
+        df_test_d = df_test_d.drop(['date', 'date_prev'], 1)
+    else:
+        df_test = df_test.drop(['date', 'date_prev'], 1)
 
     # Feature selection and model training
+    if not lg:
+        col_train = df_train.columns
+        col_test = df_test_d.columns
+        features = set(col_train).intersection(col_test)
+        features.discard('in_between')
+        X_train = df_train[features]  # Features
+        y_train = df_train['in_between']  # Target variable
+        X_test = df_test_d[features]  # Features
+        y_test = df_test_d['in_between']  # Target variable
+        # Training the algorithm
+        regressor = LinearRegression()
+        regressor.fit(X_train, y_train)
 
-    col_train = df_train.columns
-    col_test = df_test_d.columns
-    features = set(col_train).intersection(col_test)
-    features.discard('in_between')
-    X_train = df_train[features]  # Features
-    y_train = df_train['in_between']  # Target variable
-    X_test = df_test_d[features]  # Features
-    y_test = df_test_d['in_between']  # Target variable
+        y_pred = regressor.predict(X_test)
 
-    # Training the algorithm
-    regressor = LinearRegression()
-    regressor.fit(X_train, y_train)
+
+    else:
+        df_train = df_train.apply(pd.to_numeric)
+        df_test = df_test.apply(pd.to_numeric)
+
+        X_train = df_train.drop(['in_between'], axis=1)
+        y_train = df_train['in_between']  # Target variable
+        X_test = df_test.drop(['in_between'], axis=1)
+        y_test = df_test['in_between']  # Target variable
+
+        params = {
+            'learning_rate': 0.75,
+            'application': 'regression',
+            'max_depth': 3,
+            'num_leaves': 90,
+            'verbosity': -1,
+            'metric': 'RMSE',
+        }
+
+        lgb_train = lgb.Dataset(data=X_train, label=y_train)
+
+        gbm = lgb.train(params, train_set=lgb_train, num_boost_round=3000, verbose_eval=100)
+
+        y_pred = []
+        # LGBM
+
+        for i in (X_test.index):
+            y_pred.append((gbm.predict(X_test.loc[i].astype('float32'))))
+
 
     # Evaluation
 
     # Workaround to get rid of negative values
     # All 'New Case' to 0 and others to absolute value: RMSE 166.7941 (days)
-    y_pred = regressor.predict(X_test)
     df_predictions = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
     df_pred_fin = pd.concat([df_test, df_predictions], axis=1)
     df_pred_fin.loc[df_pred_fin['event'] == int(le.transform(['New Case'])), 'Predicted'] = 0
