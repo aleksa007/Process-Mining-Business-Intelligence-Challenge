@@ -14,7 +14,7 @@ To run the tool do the following:
 ```pip install -r requirements.txt```
 -  Next, run: 
 
-```python gucci_mane.py ./data/road-train.csv ./data/road-test.csv ./predict.csv```
+```python main.py ./data/road-train.csv ./data/road-test.csv ./predict.csv```
 -  Wait until the tool is done running.
 -  The new predict.csv file will show in the /build directory that includes predictions for:
     - Decision tree algorith,
@@ -44,7 +44,7 @@ https://data.4tu.nl/repository/uuid:270fd440-1057-4fb9-89a9-b699b47990f5
 
 ### Run on other datasets
 
-```python gucci_mane.py ./data/<YEAR>-train.csv ./data/<YEAR>-test.csv ./predict-<YEAR>.csv```
+```python main.py ./data/<YEAR>-train.csv ./data/<YEAR>-test.csv ./predict-<YEAR>.csv```
 
 * Keep in mind that this takes approximately 40 minutes.
 
