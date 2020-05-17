@@ -161,20 +161,7 @@ Thumbs.db
 /desktop.ini
 
 # 2017 Data - too big for git
-/Sprint4/data/2017*.csv
-/Sprint4/gucci_mane/data/2017*.csv
-/Sprint3/data/2017*.csv
-/Sprint3/gucci_mane/data/2017*.csv
-/Sprint4/data/2018*.csv
-/Sprint4/gucci_mane/data/2018*.csv
-/Sprint3/data/2018*.csv
-/Sprint3/gucci_mane/data/2018*.csv
-/Sprint4/gucci_mane/build/0.*.csv
-/Sprint4/gucci_mane/data/road_*.csv
-/Sprint4/gucci_mane/reg_test/2017*.csv
-/Sprint4/gucci_mane/reg_test/*2017.csv
-/Sprint4/gucci_mane/reg_test/*2017.npy
-/Sprint4/gucci_mane/build/*
+/build/*
 
 # VS Code
 .vscode/

@@ -1,4 +1,4 @@
-import time, argparse, sys, datetime
+import time, argparse, sys, os
 
 from process_miner.preprocess import pre_data
 from process_miner.models import baseline, combs_algo, de_tree
@@ -32,6 +32,10 @@ def main():
     # Preprocess calls
     if train_path in datasets and test_path in test_datasets:
         df_train, df_test = pre_data(train_path, test_path)
+
+        if not os.path.exists('./build'):
+            os.mkdir('./build')
+            
     else:
         print("Oops, can't find those files.")
         sys.exit()
